@@ -2,6 +2,7 @@ airtable==0.4.8
 asgiref==3.5.2
 async-generator==1.10
 attrs==22.1.0
+gunicorn==20.0.4
 certifi==2022.9.14
 charset-normalizer==2.1.1
 chromedriver-binary==108.0.5359.22.0
