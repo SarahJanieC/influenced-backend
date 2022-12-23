@@ -1,1 +1,1 @@
-web: python influenced-backend.py
+web: gunicorn app:app
