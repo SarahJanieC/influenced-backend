@@ -5,11 +5,6 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-BASEID = 'appNdjOgf8t8kpJoc'
-TABLEID = 'tblEOZLjb8fVOtWVd'
-TABLE_CREATOR_ID = 'tblsdwD9wMsnca6O4'
-API_KEY = 'keyt3vf4iF6tutTsK'
-TABLELOGIN = 'tbl7EqOTm9L6elNmv'
 AIRTABLE_URL = f'https://api.airtable.com/v0/{BASEID}/{TABLEID}'
 AIRTABLE_LOGIN = f'https://api.airtable.com/v0/{BASEID}/{TABLELOGIN}'
 AIRTABLE_URL_CREATOR = f'https://api.airtable.com/v0/{BASEID}/{TABLE_CREATOR_ID}'
