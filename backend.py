@@ -17,6 +17,7 @@ AIRTABLE_LOGIN = f'https://api.airtable.com/v0/{BASEID}/{TABLELOGIN}'
 AIRTABLE_URL_CREATOR = f'https://api.airtable.com/v0/{BASEID}/{TABLE_CREATOR_ID}'
 STATUS = ''
 CREATOR_URL = ''
+
 @app.route('/authenticate', methods=['GET'])
 def authenticateLogin():
     # Fetch data from airtable
@@ -60,7 +61,25 @@ def send_creator_data():
 
 @app.route('/getCreatorVerification', methods=['GET'])
 def getCreatorVerification():
-    return {'creatorURL': CREATOR_URL,"status": STATUS}
+    creatorlink = request.args.get('creatorURL')
+    brand = request.args.get('brand')
+    creator_request_exists = False
+    
+    # Fetch data from airtable
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        'Content-type': "application/json"
+    }
+    response = requests.get(AIRTABLE_URL_CREATOR, headers=headers)
+    if response.status_code == 200:
+        resp = response.json()
+        
+        # Determine if creator request exists in table
+        for x in resp['records']:
+            if(x['fields']['Creator URL'] == creatorlink and x['fields']['Brand'] == brand):
+                creator_request_exists = True
+    
+    return {'creatorURL': creatorlink,"brand": brand,'status': creator_request_exists}
     
 def createAirtableRecord(url,payload):
     print("Sending POST request with payload: ", payload)
@@ -159,6 +178,5 @@ def verify_CreatorData(data):
             createAirtableRecord(AIRTABLE_URL_CREATOR, data)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(port=port)
+    app.run()
     
