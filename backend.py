@@ -6,12 +6,6 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-BASEID = os.environ.get('BASEID')
-TABLEID = os.environ.get('TABLEID')
-TABLE_CREATOR_ID = os.environ.get('TABLE_CREATOR_ID')
-API_KEY = os.environ.get('API_KEY')
-TABLELOGIN = os.environ.get('TABLELOGIN')
-
 AIRTABLE_URL = f'https://api.airtable.com/v0/{BASEID}/{TABLEID}'
 AIRTABLE_LOGIN = f'https://api.airtable.com/v0/{BASEID}/{TABLELOGIN}'
 AIRTABLE_URL_CREATOR = f'https://api.airtable.com/v0/{BASEID}/{TABLE_CREATOR_ID}'
@@ -100,7 +94,7 @@ def patchAirtableRecord(url, payload):
         "Authorization": f"Bearer {API_KEY}",
         'Content-type': "application/json"
     }
-    response = requests.put(url, headers=headers, json=payload)
+    response = requests.patch(url, headers=headers, json=payload)
     print(response)
     if response.status_code == 200:
         return response.json()
@@ -112,6 +106,7 @@ def verify_BrandData(data):
     ugcBudget = data['fields']['Max Budget for UGC']
     adBudget = data['fields']['Max Budget for Ad Access']
     igBudget = data['fields']['Max Budget for (1) IG Reel']
+    url = data['fields']['Creator URL']
     recordID = ''
     
     # Fetch data from airtable
@@ -119,28 +114,32 @@ def verify_BrandData(data):
         "Authorization": f"Bearer {API_KEY}",
         'Content-type': "application/json"
     }
-    response = requests.get(AIRTABLE_URL, headers=headers)
+    response = requests.get(AIRTABLE_URL_CREATOR, headers=headers)
     
     if response.status_code == 200:
         resp = response.json()
+        
         # Determine if brand exists in table
         for x in resp['records']:
-            if(x['fields']['Brand'] == brand):
+            if(x['fields']['Brand'] == brand and x['fields']['Creator URL'] == url):
                 brand_exists = True
                 recordID = x['id']
                 
-            if(x['fields']["Max Budget for UGC"] != ugcBudget.replace("$","") or x['fields']["Max Budget for Ad Access"] != adBudget.replace("$","") or x['fields']["Max Budget for (1) IG Reel"] != igBudget.replace("$","")):
-                brand_update = True
-    
+                if("Max Budget for UGC" in x['fields'] and "Max Budget for Ad Access" in x['fields'] and "Max Budget for (1) IG Reel" in x['fields']):
+                    if(x['fields']["Max Budget for UGC"] != ugcBudget.replace("$","") or x['fields']["Max Budget for Ad Access"] != adBudget.replace("$","") or x['fields']["Max Budget for (1) IG Reel"] != igBudget.replace("$","")):
+                        brand_update = True
+                else:
+                    brand_update = True
+
     # if data exists and needs updating, put record
     if(brand_exists and brand_update):
         print(brand_exists, brand_update, "1", recordID)
-        patchAirtableRecord(f'{AIRTABLE_URL}/{recordID}', data);
+        patchAirtableRecord(f'{AIRTABLE_URL_CREATOR}/{recordID}', data);
         
-    # if data does not exist, post record in airtable
-    elif(brand_exists == False):
-        print(brand_exists, brand_update, "2", recordID)
-        createAirtableRecord(AIRTABLE_URL, data);
+    # # if data does not exist, post record in airtable
+    # elif(brand_exists == False):
+    #     print(brand_exists, brand_update, "2", recordID)
+    #     createAirtableRecord(AIRTABLE_URL_CREATOR, data);
 
 def verify_CreatorData(data):
     creator_request_exists = False
