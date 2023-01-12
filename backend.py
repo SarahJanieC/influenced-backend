@@ -136,6 +136,7 @@ def verify_BrandData(data):
         print(brand_exists, brand_update, "1", recordID)
         patchAirtableRecord(f'{AIRTABLE_URL_CREATOR}/{recordID}', data);
         
+        
     # # if data does not exist, post record in airtable
     # elif(brand_exists == False):
     #     print(brand_exists, brand_update, "2", recordID)
